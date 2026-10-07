@@ -10,8 +10,9 @@
     <packaging>pom</packaging>
 
     <modules>
-        <!-- custom-checks must be built before demo, which loads it as a javac plugin -->
+        <!-- custom-checks and refaster-rules must be built before demo, which uses both -->
         <module>custom-checks</module>
+        <module>refaster-rules</module>
         <module>demo</module>
     </modules>
 
@@ -21,6 +22,8 @@
         <error-prone.version>2.50.0</error-prone.version>
         <auto-service.version>1.1.1</auto-service.version>
         <junit.version>5.13.4</junit.version>
+        <!-- Written by refaster-rules, applied to demo by the 'refaster' profile -->
+        <refaster.rules>${maven.multiModuleProjectDirectory}/refaster-rules/target/rules.refaster</refaster.rules>
     </properties>
 
     <dependencyManagement>

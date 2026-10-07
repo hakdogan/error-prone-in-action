@@ -13,6 +13,8 @@
     <artifactId>demo</artifactId>
 
     <properties>
+        <!-- Extra Error Prone flags; the 'refaster' profile sets them -->
+        <errorprone.args></errorprone.args>
         <!-- SensitiveDataLogging is an ERROR, but CheckoutService violates it on purpose, so the
              default build lowers it to a warning; the 'sensitive-data' profile restores it -->
         <errorprone.sensitive-data>-Xep:SensitiveDataLogging:WARN</errorprone.sensitive-data>
@@ -27,7 +29,7 @@
                     <compilerArgs>
                         <arg>-XDcompilePolicy=simple</arg>
                         <arg>--should-stop=ifError=FLOW</arg>
-                        <arg>-Xplugin:ErrorProne ${errorprone.sensitive-data}</arg>
+                        <arg>-Xplugin:ErrorProne ${errorprone.sensitive-data} ${errorprone.args}</arg>
                         <!-- necessary only if building with JDK21: https://github.com/google/error-prone/issues/5426 -->
                         <arg>-XDaddTypeAnnotationsToSymbol=true</arg>
                         <!-- Error Prone needs javac internals opened up. Since this plugin
@@ -53,6 +55,13 @@
     </build>
 
     <profiles>
+        <!-- mvn verify -Prefaster: rewrites demo sources in place with the Refaster rules -->
+        <profile>
+            <id>refaster</id>
+            <properties>
+                <errorprone.args>-XepPatchChecks:refaster:${refaster.rules} -XepPatchLocation:IN_PLACE</errorprone.args>
+            </properties>
+        </profile>
         <!-- mvn verify -Psensitive-data: CheckoutService's log lines now fail the build -->
         <profile>
             <id>sensitive-data</id>

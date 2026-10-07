@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.jugistanbul</groupId>
+        <artifactId>ErrorProne</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>demo</artifactId>
+
+    <properties>
+        <!-- SensitiveDataLogging is an ERROR, but CheckoutService violates it on purpose, so the
+             default build lowers it to a warning; the 'sensitive-data' profile restores it -->
+        <errorprone.sensitive-data>-Xep:SensitiveDataLogging:WARN</errorprone.sensitive-data>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <compilerArgs>
+                        <arg>-XDcompilePolicy=simple</arg>
+                        <arg>--should-stop=ifError=FLOW</arg>
+                        <arg>-Xplugin:ErrorProne ${errorprone.sensitive-data}</arg>
+                        <!-- necessary only if building with JDK21: https://github.com/google/error-prone/issues/5426 -->
+                        <arg>-XDaddTypeAnnotationsToSymbol=true</arg>
+                        <!-- Error Prone needs javac internals opened up. Since this plugin
+                             compiles in-process (fork=false), -J flags would be ignored, so the
+                             add-exports/add-opens flags live in .mvn/jvm.config instead. -->
+                    </compilerArgs>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>com.google.errorprone</groupId>
+                            <artifactId>error_prone_core</artifactId>
+                            <version>${error-prone.version}</version>
+                        </path>
+                        <!-- Our own BugCheckers, discovered via ServiceLoader -->
+                        <path>
+                            <groupId>org.jugistanbul</groupId>
+                            <artifactId>custom-checks</artifactId>
+                            <version>${project.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <!-- mvn verify -Psensitive-data: CheckoutService's log lines now fail the build -->
+        <profile>
+            <id>sensitive-data</id>
+            <properties>
+                <errorprone.sensitive-data>-Xep:SensitiveDataLogging:ERROR</errorprone.sensitive-data>
+            </properties>
+        </profile>
+    </profiles>
+
+</project>

@@ -10,7 +10,9 @@
     <packaging>pom</packaging>
 
     <modules>
+        <!-- custom-checks must be built before demo, which loads it as a javac plugin -->
         <module>custom-checks</module>
+        <module>demo</module>
     </modules>
 
     <properties>

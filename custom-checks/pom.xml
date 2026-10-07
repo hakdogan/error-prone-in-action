@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.jugistanbul</groupId>
+        <artifactId>ErrorProne</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>custom-checks</artifactId>
+
+    <properties>
+        <!-- BugChecker signatures expose javac internals (e.g. JCDiagnostic), which need
+             add-exports at compile time; javac rejects add-exports together with release. -->
+        <maven.compiler.release></maven.compiler.release>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+    </properties>
+
+    <dependencies>
+        <!-- Provided by error_prone_core at plugin load time -->
+        <dependency>
+            <groupId>com.google.errorprone</groupId>
+            <artifactId>error_prone_check_api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.auto.service</groupId>
+            <artifactId>auto-service-annotations</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.errorprone</groupId>
+            <artifactId>error_prone_test_helpers</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <compilerArgs>
+                        <arg>--add-exports=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</arg>
+                        <arg>--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED</arg>
+                        <arg>--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED</arg>
+                    </compilerArgs>
+                    <annotationProcessorPaths>
+                        <!-- Generates META-INF/services/com.google.errorprone.bugpatterns.BugChecker -->
+                        <path>
+                            <groupId>com.google.auto.service</groupId>
+                            <artifactId>auto-service</artifactId>
+                            <version>${auto-service.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <!-- The test helpers run javac in the forked test JVM, which does not
+                         read .mvn/jvm.config, so the same flags are repeated here. -->
+                    <argLine>
+                        --add-exports jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED
+                        --add-exports jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED
+                        --add-exports jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED
+                        --add-exports jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED
+                        --add-exports jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED
+                        --add-exports jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED
+                        --add-exports jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED
+                        --add-exports jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED
+                        --add-opens jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED
+                        --add-opens jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED
+                    </argLine>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

@@ -2,7 +2,7 @@
 
 A small Maven project that shows how [Error Prone](https://errorprone.info/) catches bugs at compile
 time, and how to extend it with your own rules. It is the companion code for the article
-*Introduction to Error Prone: How to catch bugs at compile time*.
+[Introduction to Error Prone: How to catch bugs at compile time](https://medium.com/@hakdogan/introduction-to-error-prone-how-to-catch-bugs-at-compile-time-03d1396be267).
 
 The Java compiler only checks that code follows the language rules. Error Prone plugs into `javac`
 and uses its type information to flag code that compiles but is almost certainly wrong. This repo
